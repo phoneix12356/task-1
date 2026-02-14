@@ -5,6 +5,22 @@ import Stats from './components/Stats';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect } from 'react';
 
+const moodGradients = {
+  radiant: 'from-orange-600/20 via-slate-950 to-slate-950',
+  happy: 'from-emerald-600/20 via-slate-950 to-slate-950',
+  neutral: 'from-blue-600/20 via-slate-950 to-slate-950',
+  down: 'from-indigo-600/20 via-slate-950 to-slate-950',
+  ominous: 'from-slate-600/20 via-slate-950 to-slate-950',
+};
+
+const moodShadows = {
+  radiant: 'shadow-orange-500/10',
+  happy: 'shadow-emerald-500/10',
+  neutral: 'shadow-blue-500/10',
+  down: 'shadow-indigo-500/10',
+  ominous: 'shadow-slate-500/10',
+};
+
 function App() {
   const [entries, setEntries] = useState(() => {
     const saved = localStorage.getItem('mindvault_entries');
@@ -68,8 +84,10 @@ function App() {
     }
   };
 
+  const currentGradient = moodGradients[activeEntry.mood] || moodGradients.neutral;
+
   return (
-    <div className="flex h-screen w-full bg-slate-950 overflow-hidden font-sans text-slate-200">
+    <div className={`flex h-screen w-full bg-slate-950 bg-gradient-to-br ${currentGradient} transition-all duration-1000 overflow-hidden font-sans text-slate-200`}>
       <Sidebar
         entries={entries}
         activeEntryId={activeEntry.id}
@@ -126,7 +144,7 @@ function App() {
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 1.05 }}
-                className="h-full p-12 bg-white/5 backdrop-blur-xl rounded-3xl border border-white/10 flex flex-col gap-6 overflow-y-auto custom-scrollbar"
+                className={`h-full p-12 bg-white/5 backdrop-blur-xl rounded-3xl border border-white/10 flex flex-col gap-6 overflow-y-auto custom-scrollbar shadow-2xl ${moodShadows[activeEntry.mood] || moodShadows.neutral}`}
               >
                 <div className="flex justify-between items-start">
                   <h1 className="text-6xl font-black text-white">{activeEntry.title || 'Untitled'}</h1>

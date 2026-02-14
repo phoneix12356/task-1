@@ -4,11 +4,23 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Sidebar({ entries, activeEntryId, onSelectEntry, onNewEntry, onDeleteEntry, onToggleStats }) {
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedMood, setSelectedMood] = useState('all');
 
-  const filteredEntries = entries.filter(entry =>
-    entry.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    entry.content.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const moods = [
+    { id: 'all', label: 'All', color: 'bg-white/10' },
+    { id: 'radiant', label: 'Radiant', color: 'bg-yellow-400' },
+    { id: 'happy', label: 'Happy', color: 'bg-green-400' },
+    { id: 'neutral', label: 'Neutral', color: 'bg-blue-400' },
+    { id: 'down', label: 'Down', color: 'bg-indigo-400' },
+    { id: 'ominous', label: 'Ominous', color: 'bg-slate-400' },
+  ];
+
+  const filteredEntries = entries.filter(entry => {
+    const matchesSearch = entry.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      entry.content.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesMood = selectedMood === 'all' || entry.mood === selectedMood;
+    return matchesSearch && matchesMood;
+  });
 
   return (
     <div className="w-80 h-full flex flex-col gap-6 p-6 bg-slate-900 border-r border-white/5">
@@ -39,15 +51,32 @@ export default function Sidebar({ entries, activeEntryId, onSelectEntry, onNewEn
         </div>
       </div>
 
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-        <input
-          type="text"
-          placeholder="Search entries..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full bg-white/5 border border-white/5 rounded-xl py-2 pl-10 pr-4 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500/50 text-white"
-        />
+      <div className="space-y-4">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+          <input
+            type="text"
+            placeholder="Search entries..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full bg-white/5 border border-white/5 rounded-xl py-2 pl-10 pr-4 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500/50 text-white"
+          />
+        </div>
+
+        <div className="flex gap-2 p-1 bg-white/5 rounded-xl overflow-x-auto no-scrollbar">
+          {moods.map(mood => (
+            <button
+              key={mood.id}
+              onClick={() => setSelectedMood(mood.id)}
+              className={`flex-shrink-0 px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${selectedMood === mood.id
+                ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20'
+                : 'text-slate-500 hover:text-slate-200 hover:bg-white/5'
+                }`}
+            >
+              {mood.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="flex-grow overflow-y-auto space-y-2 pr-2 custom-scrollbar">

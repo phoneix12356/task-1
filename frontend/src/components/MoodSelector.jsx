@@ -7,7 +7,7 @@ const moods = [
   { icon: Smile, label: 'Happy', color: 'text-green-400', id: 'happy' },
   { icon: Meh, label: 'Neutral', color: 'text-blue-400', id: 'neutral' },
   { icon: Frown, label: 'Down', color: 'text-indigo-400', id: 'down' },
-  { icon: CloudRain, label: 'Gloomy', color: 'text-slate-400', id: 'gloomy' },
+  { icon: CloudRain, label: 'Ominous', color: 'text-slate-400', id: 'ominous' },
 ];
 
 export default function MoodSelector({ activeMood, onMoodSelect }) {
@@ -24,8 +24,8 @@ export default function MoodSelector({ activeMood, onMoodSelect }) {
             whileTap={{ scale: 0.95 }}
             onClick={() => onMoodSelect(mood.id)}
             className={`flex flex-col items-center gap-2 p-3 rounded-xl transition-all ${isActive
-                ? 'bg-white/10 ring-2 ring-indigo-500/50'
-                : 'hover:bg-white/5'
+              ? 'bg-white/10 ring-2 ring-indigo-500/50'
+              : 'hover:bg-white/5'
               }`}
           >
             <Icon className={`w-6 h-6 ${isActive ? mood.color : 'text-slate-400'}`} />
