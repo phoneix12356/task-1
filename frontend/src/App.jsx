@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
 import Sidebar from './components/Sidebar';
 import MoodSelector from './components/MoodSelector';
 import JournalEditor from './components/JournalEditor';
+import Stats from './components/Stats';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useEffect } from 'react';
 
 function App() {
   const [entries, setEntries] = useState(() => {
@@ -19,6 +20,7 @@ function App() {
   });
 
   const [isEditing, setIsEditing] = useState(true);
+  const [showStats, setShowStats] = useState(false);
 
   useEffect(() => {
     localStorage.setItem('mindvault_entries', JSON.stringify(entries));
@@ -56,13 +58,25 @@ function App() {
     }
   };
 
+  const handleDelete = (id) => {
+    if (window.confirm('Are you sure you want to delete this memory?')) {
+      const updatedEntries = entries.filter(e => e.id !== id);
+      setEntries(updatedEntries);
+      if (activeEntry.id === id) {
+        handleNewEntry();
+      }
+    }
+  };
+
   return (
-    <div className="flex h-screen w-full bg-slate-950 overflow-hidden font-sans">
+    <div className="flex h-screen w-full bg-slate-950 overflow-hidden font-sans text-slate-200">
       <Sidebar
         entries={entries}
         activeEntryId={activeEntry.id}
         onSelectEntry={handleSelectEntry}
         onNewEntry={handleNewEntry}
+        onDeleteEntry={handleDelete}
+        onToggleStats={() => setShowStats(!showStats)}
       />
 
       <main className="flex-grow flex flex-col p-8 gap-8 overflow-hidden">
@@ -88,14 +102,22 @@ function App() {
         </header>
 
         <section className="flex-grow overflow-hidden relative">
+          <AnimatePresence>
+            {showStats && (
+              <Stats entries={entries} onClose={() => setShowStats(false)} />
+            )}
+          </AnimatePresence>
+
           <AnimatePresence mode="wait">
             {isEditing ? (
               <JournalEditor
                 key="editor"
                 title={activeEntry.title}
                 content={activeEntry.content}
+                image={activeEntry.image}
                 onTitleChange={(title) => setActiveEntry({ ...activeEntry, title })}
                 onContentChange={(content) => setActiveEntry({ ...activeEntry, content })}
+                onImageChange={(image) => setActiveEntry({ ...activeEntry, image })}
                 onSave={handleSave}
               />
             ) : (
@@ -104,18 +126,37 @@ function App() {
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 1.05 }}
-                className="h-full p-12 bg-white/5 backdrop-blur-xl rounded-3xl border border-white/10 flex flex-col gap-6"
+                className="h-full p-12 bg-white/5 backdrop-blur-xl rounded-3xl border border-white/10 flex flex-col gap-6 overflow-y-auto custom-scrollbar"
               >
                 <div className="flex justify-between items-start">
                   <h1 className="text-6xl font-black text-white">{activeEntry.title || 'Untitled'}</h1>
-                  <button
-                    onClick={() => setIsEditing(true)}
-                    className="px-4 py-2 bg-white/5 hover:bg-white/10 rounded-lg text-sm font-semibold transition-colors"
-                  >
-                    Edit Entry
-                  </button>
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => setIsEditing(true)}
+                      className="px-4 py-2 bg-white/5 hover:bg-white/10 rounded-lg text-sm font-semibold transition-colors"
+                    >
+                      Edit Entry
+                    </button>
+                    <button
+                      onClick={() => handleDelete(activeEntry.id)}
+                      className="px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-lg text-sm font-semibold transition-colors"
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </div>
-                <div className="flex-grow overflow-y-auto pr-8 custom-scrollbar">
+
+                {activeEntry.image && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="w-full max-h-[400px] rounded-2xl overflow-hidden border border-white/10"
+                  >
+                    <img src={activeEntry.image} alt="Journal" className="w-full h-full object-cover" />
+                  </motion.div>
+                )}
+
+                <div className="flex-grow pr-8">
                   <p className="text-2xl text-slate-400 leading-relaxed whitespace-pre-wrap font-light">
                     {activeEntry.content || 'Memory is empty...'}
                   </p>
